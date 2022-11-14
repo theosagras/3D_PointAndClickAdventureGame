@@ -2,28 +2,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class pickableObject : MonoBehaviour
+public class lookableObject : MonoBehaviour
 {
     [SerializeField] float distanceFromObjToAct;
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
-    public void act()
+    public  void act()
     {
-        Debug.Log("PickedUp");
-        Managers.Inventory.AddItem("box");
-        Managers.Inventory.DisplayItems();
-        Managers.Scene.UpdateNavMesh();
-        Destroy(gameObject);
-    
+        Managers.Player.playerControl.setDirectionToFace(transform.position);
+        InteractableObject parentObj = GetComponent<InteractableObject>();
+        Managers.Dialogue.StartDescription(parentObj.description);
+
+
     }
     public float _getDistanceToActFrom()
     {

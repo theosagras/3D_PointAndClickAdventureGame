@@ -4,8 +4,10 @@ using System.Collections.Generic;
 public class PlayerManager : MonoBehaviour, GameManager
 {
     public ManagerStatus status { get; private set; }
+    public PlayerController playerControl;
     public int health { get; private set; }
     public int maxHealth { get; private set; }
+
     public void Startup()
     {
         Debug.Log("Player manager starting...");
