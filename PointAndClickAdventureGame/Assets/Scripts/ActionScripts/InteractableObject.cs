@@ -10,7 +10,7 @@ public  class InteractableObject : MonoBehaviour
     public EnumWhichActions whichAction;
     CursorMode cursorMode = CursorMode.Auto;
     Vector2 hotSpot = Vector2.zero;
-
+    Vector2 pickUpCursorOffset = new Vector2(0, 100);
 
      Texture2D CursorDefaultTxt;
      Texture2D CursorLookTxtr;
@@ -73,10 +73,20 @@ public  class InteractableObject : MonoBehaviour
         CursorUseTxtr = Resources.Load<Texture2D>("Cursor/use");
         CursorPickUpTxtr = Resources.Load<Texture2D>("Cursor/pickUp");
    
-
-
     }
 
+    public Vector3 getWaypointIfExistsOtherwiseObjectsPos()
+    {   
+        //αν το interactableobject έχει child gameobject με tag wayPoint επιστρέφει τη θεση αυτού και ο παίκτης πηγαίνει εκεί.
+        foreach (Transform childTransform in transform)
+        {
+            if (childTransform.CompareTag("wayPoint"))
+            {
+                return childTransform.position;                
+            }
+        }
+        return transform.position;//αλλιώς πηγαίνει στην position του  interactableobject
+    }
 
 
     // Update is called once per frame
@@ -97,7 +107,7 @@ public  class InteractableObject : MonoBehaviour
         }
         else if (whichAction == EnumWhichActions.pickUp)
         {
-            Cursor.SetCursor(CursorPickUpTxtr, hotSpot, cursorMode);
+            Cursor.SetCursor(CursorPickUpTxtr, pickUpCursorOffset, cursorMode);
         }
     }
     private void OnMouseExit()

@@ -10,7 +10,7 @@ public class DialogueManager : MonoBehaviour, GameManager
     public TextMeshProUGUI dialogueText;
     public GameObject dialogueGameObject;
     private Queue<string> sentences;
-
+    public GameObject uiNextBtn;
     private float timeOpenedDialogueSentence;
     void Start()
     {
@@ -30,18 +30,23 @@ public class DialogueManager : MonoBehaviour, GameManager
         {
             sentences.Enqueue(sentence);
         }
-        
+
         DisplayNextSentence();
     }
 
     public void DisplayNextSentence()
     {
-        if (sentences.Count == 0)
+        uiNextBtn.SetActive(true);
+        if (sentences.Count == 1)
+            uiNextBtn.SetActive(false);
+        else if (sentences.Count == 0)
         {
+
             EndDialogue();
+
             return;
         }
-        timeOpenedDialogueSentence=2;//2 δευτερόλεπτα θα παραμεινει ανοιχτή η φράση
+        timeOpenedDialogueSentence = 2;//2 δευτερόλεπτα θα παραμεινει ανοιχτή η φράση
         string sentence = sentences.Dequeue();
         dialogueText.text = sentence;
     }
@@ -51,9 +56,9 @@ public class DialogueManager : MonoBehaviour, GameManager
     }
 
 
-       public void StartDescription(string[] description)
+    public void StartDescription(string[] description)
     {
-         dialogueGameObject.SetActive(true);
+        dialogueGameObject.SetActive(true);
         sentences.Clear();
         nameText.text = "Εγώ";
         foreach (string sentence in description)
@@ -63,12 +68,13 @@ public class DialogueManager : MonoBehaviour, GameManager
         DisplayNextSentence();
     }
 
-    void Update() {
-        if (timeOpenedDialogueSentence>0)
+    void Update()
+    {
+        if (timeOpenedDialogueSentence > 0)
         {
 
-        timeOpenedDialogueSentence-=Time.deltaTime;
-        if (timeOpenedDialogueSentence<=0)
+            timeOpenedDialogueSentence -= Time.deltaTime;
+            if (timeOpenedDialogueSentence <= 0)
                 DisplayNextSentence();
         }
     }

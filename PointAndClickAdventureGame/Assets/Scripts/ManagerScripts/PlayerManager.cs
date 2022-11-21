@@ -5,6 +5,7 @@ public class PlayerManager : MonoBehaviour, GameManager
 {
     public ManagerStatus status { get; private set; }
     public PlayerController playerControl;
+    public Animator animatorPlayer;
     public int health { get; private set; }
     public int maxHealth { get; private set; }
 
@@ -27,5 +28,10 @@ public class PlayerManager : MonoBehaviour, GameManager
             health = 0;
         }
         Debug.Log("Health: " + health + "/" + maxHealth);
+    }
+
+    public void setAnimToPlay()
+    {
+        animatorPlayer.SetTrigger("PickUp");
     }
 }

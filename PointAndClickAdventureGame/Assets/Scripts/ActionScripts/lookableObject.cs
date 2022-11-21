@@ -18,7 +18,6 @@ public class lookableObject : MonoBehaviour
     }
     public  void act()
     {
-        Managers.Player.playerControl.setDirectionToFace(transform.position);
         InteractableObject parentObj = GetComponent<InteractableObject>();
         Managers.Dialogue.StartDescription(parentObj.description);
 
