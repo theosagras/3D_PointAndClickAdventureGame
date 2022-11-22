@@ -8,7 +8,11 @@ public class PlayerController : MonoBehaviour
 {
     public Camera camera;
     public NavMeshAgent agent;
+    public float initialAgentsSpeed;
     public ThirdPersonCharacter character;
+    private int leftClickedPressedTimes;
+    private float firstLeftClickTime;
+    private float timeFirstTosSecondClick = 0.5f;
 
     InteractableObject ObjectClicked;
     float DistanceAddedToRemainingDistanceToActFrom;
@@ -95,8 +99,16 @@ public class PlayerController : MonoBehaviour
         //left mouse click
         if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())//όχι όταν πατάς πάνω σε ui element (πχ διαλόγους)
         {
+            Managers.Player.playerControl.agent.speed = initialAgentsSpeed;
+            leftClickedPressedTimes++;
+            if (leftClickedPressedTimes==1)
+            {
+                firstLeftClickTime = Time.time;
+                StartCoroutine(DetectDoubleClicked());
+            }
+
             stopMoving();
-            Managers.UI_Manager.InvBtnPressedGoUp();
+            Managers.Inventory.InvGoUpForced();
             Ray ray = camera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
@@ -136,7 +148,21 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-
+    private IEnumerator DetectDoubleClicked()
+    {
+        while (Time.time<firstLeftClickTime+ timeFirstTosSecondClick)
+        {
+            if (leftClickedPressedTimes==2)
+            {
+                Managers.Player.playerControl.agent.speed *= 2;
+                break;
+               
+            }
+            yield return new WaitForSeconds(0);
+        }
+        leftClickedPressedTimes = 0;
+       
+    }
     public void setDirectionToFace(Vector3 directionToface)
     {
         isTurning = true;

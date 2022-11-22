@@ -13,6 +13,9 @@ public class InventoryManager : MonoBehaviour, GameManager
     public int WhichInvShownFirst=0;
     public Button leftInvButton;
     public Button rightInvButton;
+
+    private bool invIsUp;
+    public Animator invAnim;
     public void Startup()
     {
         _items = new Dictionary<string, string[]>();
@@ -20,13 +23,43 @@ public class InventoryManager : MonoBehaviour, GameManager
         status = ManagerStatus.Started;
      
     }
+    public void InvBtnPressed()
+    {
+        if (!invIsUp)//να κατεβει το inv
+        {
+            InvGoUpForced();
+        }
+
+        else //να ανεβεί το inv
+        {
+            InvGoDownForced();
+        }
+    }
+    public void InvGoUpForced()
+    {
+        invAnim.SetBool("goUp1", true);
+        invAnim.SetBool("goDown1", false);
+        invIsUp = true;
+       
+    }
+    public void InvGoDownForced()
+    {
+        invAnim.SetBool("goUp1", false);
+        invAnim.SetBool("goDown1", true);
+        invIsUp = false;
+    }
 
     public void DisplayItems()
     {
         string itemDisplay = "Items: ";
         foreach (KeyValuePair<string, string[]> item in _items)
         {
-            itemDisplay += item.Key + "(" + item.Value[0]+"   "+item.Value[1] + ") ";
+            itemDisplay += item.Key + " (";
+            foreach (string aa in item.Value)
+            {
+                itemDisplay += aa;
+                itemDisplay += ") ";
+            }
         }
         Debug.Log(itemDisplay);
     }

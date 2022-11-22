@@ -9,9 +9,15 @@ public class DialogueManager : MonoBehaviour, GameManager
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI dialogueText;
     public GameObject dialogueGameObject;
+
     private Queue<string> sentences;
     public GameObject uiNextBtn;
     private float timeOpenedDialogueSentence;
+
+
+    public GameObject DownMainTextGameObject;
+    public TextMeshProUGUI DownMainText;
+
     void Start()
     {
         sentences = new Queue<string>();
@@ -78,4 +84,16 @@ public class DialogueManager : MonoBehaviour, GameManager
                 DisplayNextSentence();
         }
     }
+
+    public void EnableMainTextCommand(string commandStr)
+    {
+        DownMainText.text = commandStr;
+        DownMainTextGameObject.SetActive(true);
+    }
+    public void DisableMainTextCommand()
+    {
+        DownMainText.text = "";
+        DownMainTextGameObject.SetActive(false);
+    }
+    
 }

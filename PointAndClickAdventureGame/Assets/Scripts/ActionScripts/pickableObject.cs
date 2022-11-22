@@ -22,7 +22,7 @@ public class pickableObject : MonoBehaviour
     public void act()
     {
         Debug.Log("PickedUp");
-        Managers.UI_Manager.InvBtnPressedGoDown();
+        Managers.Inventory.InvGoDownForced();
         Managers.Player.setAnimToPlay();
         StartCoroutine(pickUpAfterAnim());
        

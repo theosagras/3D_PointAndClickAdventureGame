@@ -5,7 +5,8 @@ using UnityEngine;
 public  class InteractableObject : MonoBehaviour
 {
     [SerializeField] string nameObj;
-     [TextArea(3,10)]
+    [SerializeField] string nameObjWithArticle;
+    [TextArea(3,10)]
     public string[] description;
     public EnumWhichActions whichAction;
     CursorMode cursorMode = CursorMode.Auto;
@@ -96,24 +97,31 @@ public  class InteractableObject : MonoBehaviour
     }
     void OnMouseEnter()
     {
+        string commandStr="";
         if (whichAction == EnumWhichActions.look)
         {
             Cursor.SetCursor(CursorLookTxtr, hotSpot, cursorMode);
+            commandStr = "κοίταξε ";
         }
         else if (whichAction == EnumWhichActions.use)
         {
             Cursor.SetCursor(CursorUseTxtr, hotSpot, cursorMode);
-            
+            commandStr = "χρησιμοποίησε ";
+
         }
         else if (whichAction == EnumWhichActions.pickUp)
         {
             Cursor.SetCursor(CursorPickUpTxtr, pickUpCursorOffset, cursorMode);
+            commandStr = "πάρε ";
         }
+        commandStr += nameObjWithArticle;
+        Managers.Dialogue.EnableMainTextCommand(commandStr);
+        
     }
     private void OnMouseExit()
     {
         Cursor.SetCursor(CursorDefaultTxt, hotSpot, cursorMode);
-
+        Managers.Dialogue.DisableMainTextCommand();
     }
 
 }
