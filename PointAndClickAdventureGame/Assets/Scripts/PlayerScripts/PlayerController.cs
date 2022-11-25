@@ -20,8 +20,10 @@ public class PlayerController : MonoBehaviour
     bool facingTarget;
     bool rightClicked;
     Vector3 direcToTurn;
-    public GameObject InventoryGoUpBtn;
-    // Start is called before the first frame update
+
+    public GameObject PrefabClickParticles;//εμφανίζεται όταν κάνεις αριστερό κλικ
+    private GameObject ClickParticleInstatiated;
+    private bool AnimPlayerIsPlaying;
     void Start()
     {
         agent.updateRotation = false;
@@ -97,7 +99,7 @@ public class PlayerController : MonoBehaviour
             }
         }
         //left mouse click
-        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())//όχι όταν πατάς πάνω σε ui element (πχ διαλόγους)
+        if (Input.GetMouseButtonDown(0) && !AnimPlayerIsPlaying && !EventSystem.current.IsPointerOverGameObject())//όχι όταν πατάς πάνω σε ui element (πχ διαλόγους)
         {
             Managers.Player.playerControl.agent.speed = initialAgentsSpeed;
             leftClickedPressedTimes++;
@@ -112,7 +114,9 @@ public class PlayerController : MonoBehaviour
             Ray ray = camera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
-            {
+            {               
+                ClickParticleInstatiated= Instantiate(PrefabClickParticles, hit.point, Quaternion.identity);
+                Destroy(ClickParticleInstatiated, 1);
                 GameObject hitObject = hit.transform.gameObject;
                 InteractableObject target = hitObject.GetComponent<InteractableObject>();
                 if (target != null)
@@ -128,15 +132,16 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }//right click
-        else if (Input.GetMouseButtonDown(1) && !EventSystem.current.IsPointerOverGameObject())//όχι όταν πατάς πάνω σε ui element (πχ διαλόγους)
+        else if (Input.GetMouseButtonDown(1) && !AnimPlayerIsPlaying && !EventSystem.current.IsPointerOverGameObject())//όχι όταν πατάς πάνω σε ui element (πχ διαλόγους)
         {
-
             stopMoving();
             DistanceAddedToRemainingDistanceToActFrom = 100;
             Ray ray = camera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {
+                ClickParticleInstatiated = Instantiate(PrefabClickParticles, hit.point, Quaternion.identity);
+                Destroy(ClickParticleInstatiated, 1);
                 GameObject hitObject = hit.transform.gameObject;
                 InteractableObject target = hitObject.GetComponent<InteractableObject>();
                 ObjectClicked = target;
@@ -180,4 +185,10 @@ public class PlayerController : MonoBehaviour
         facingTarget = false;
         isTurning = false;
     }
+
+    public void SetAnimPlayerIsPlaying(bool _AnimPlayerIsPlaying)
+    {
+        AnimPlayerIsPlaying = _AnimPlayerIsPlaying;
+    }
+
 }

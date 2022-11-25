@@ -56,7 +56,7 @@ public class pickableObject : MonoBehaviour
         Managers.Inventory.DisplayItems();
         Managers.Scene.UpdateNavMesh();
         Managers.UI_Manager.setCursorTodefault();
-        
+        Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
         Destroy(gameObject);
 
     }

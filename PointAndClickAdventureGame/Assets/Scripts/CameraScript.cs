@@ -31,13 +31,24 @@ public class CameraScript : MonoBehaviour
         Vector3 cameraFinalPosWithClamp;
         cameraFinalPosWithClamp = target.position - (rotation * _offset);
         float zValue = cameraFinalPosWithClamp.z;
-
+        float xValue = cameraFinalPosWithClamp.x;
         float zPos = Mathf.Clamp(zValue, -5.87f, 10);
-        cameraFinalPosWithClamp = new Vector3(cameraFinalPosWithClamp.x, cameraFinalPosWithClamp.y, zPos);
+        float xPos = Mathf.Clamp(xValue, -2f, 2f);
+        
+        cameraFinalPosWithClamp = new Vector3(xPos, cameraFinalPosWithClamp.y, zPos);
 
 
         transform.position = cameraFinalPosWithClamp;
-
+        
         transform.LookAt(target);
+        float xRotValue = transform.eulerAngles.x;
+        float xRot= Mathf.Clamp(xRotValue, -100, 40);
+        float yRotValue = transform.eulerAngles.y;
+        if (yRotValue > 180)
+            yRotValue = yRotValue-360;
+         float yRot = Mathf.Clamp(yRotValue, -20, 20);
+        
+        Debug.Log(yRot);
+        transform.eulerAngles = new Vector3(xRot, yRot, transform.eulerAngles.z);
     }
 }

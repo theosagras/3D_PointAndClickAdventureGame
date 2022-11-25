@@ -24,8 +24,10 @@ public  class InteractableObject : MonoBehaviour
 
     public void act()
     {
+        Managers.Player.playerControl.SetAnimPlayerIsPlaying(true);
         switch (whichAction)
         {
+            
             case EnumWhichActions.pickUp:
                 pickableObject p_obj = GetComponent<pickableObject>();
                 p_obj.act();
