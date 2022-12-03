@@ -29,7 +29,11 @@ public class UIManager : MonoBehaviour, GameManager
         Cursor.SetCursor(CursorDefaultTxt, hotSpot, cursorMode);
     }
 
-    
+    public void setCursorToItemIconAndUse(Texture2D itemIcon)
+    {
+        Cursor.SetCursor(itemIcon, hotSpot, cursorMode);
+    }
+
 
 
 

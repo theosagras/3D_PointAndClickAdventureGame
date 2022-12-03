@@ -17,7 +17,10 @@ public class PlaceDialogueUpHeadScipt : MonoBehaviour
     {
         //transform.Translate(new Vector3(0, 0.01f, 0));
        transform.position = UpHeadPosition.position;
-        transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, 1);
+        
+        if (transform.localPosition.x < -1) transform.localPosition= new Vector3(-1, transform.localPosition.y, 1);
+        else if (transform.localPosition.x >1) transform.localPosition = new Vector3(1, transform.localPosition.y, 1);//γα να είναι όλη η πρόταση εντός οθόνης
+        else transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, 1);
         //  Vector3 uiElementPosition = CanvasCamera.WorldToScreenPoint(CurrentUIElementWorldPosition);
         //  Vector3 coolNewWorldPosition = Camera.main.ScreenToWorldPoint(uiElementPosition);
     }

@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviour
     public GameObject PrefabClickParticles;//εμφανίζεται όταν κάνεις αριστερό κλικ
     private GameObject ClickParticleInstatiated;
     private bool AnimPlayerIsPlaying;
+    public Dialogue nothingThere;
     void Start()
     {
         agent.updateRotation = false;
@@ -36,6 +37,8 @@ public class PlayerController : MonoBehaviour
 
         if (agent.remainingDistance > agent.stoppingDistance + DistanceAddedToRemainingDistanceToActFrom)//Κινείται προς προορισμό αν απέχει από αυτόν
         {
+ 
+
             character.Move(agent.desiredVelocity, false, false);
         }
         else
@@ -114,34 +117,48 @@ public class PlayerController : MonoBehaviour
             Ray ray = camera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
-            {               
-                ClickParticleInstatiated= Instantiate(PrefabClickParticles, hit.point, Quaternion.identity);
-                Destroy(ClickParticleInstatiated, 1);
+            {
+                showParticleAfterClick(hit.point);
                 GameObject hitObject = hit.transform.gameObject;
                 InteractableObject target = hitObject.GetComponent<InteractableObject>();
                 if (target != null)
                 {
                     ObjectClicked = target;  //θα κάνει ενέργεια όταν φτάσει στο σημείο που βρίσκεται το αντικείμενο και έχει γυρίσει προς το μέρος του
                     DistanceAddedToRemainingDistanceToActFrom = target.getDistanceToActFrom();
-                    agent.SetDestination(target.getWaypointIfExistsOtherwiseObjectsPos());
+                    if (Vector3.Distance(hit.point, transform.position)> agent.stoppingDistance + DistanceAddedToRemainingDistanceToActFrom)//διορθώνει ένα μικρό τσούλισμα του παίκτη που έκανε χωρίς λόγο
+                     agent.SetDestination(target.getWaypointIfExistsOtherwiseObjectsPos());
                 }
-                else
+                else//έχει γίνει κλικ σε μη interactable σημείο
                 {
-                    DistanceAddedToRemainingDistanceToActFrom = 0;
-                    agent.SetDestination(hit.point);//απλά ο παίκτης πηγαίνει στο σημείο
+                    if (Managers.Inventory.equippedInvNum == -1) //αν δεν έχει equip item
+                    {
+                        DistanceAddedToRemainingDistanceToActFrom = 0;
+                        agent.SetDestination(hit.point);//απλά ο παίκτης πηγαίνει στο σημείο
+                    }
+                    else//αν έχει equipped item
+                    {
+                        Managers.Dialogue.StartDialogue(nothingThere);
+                        Managers.UI_Manager.setCursorTodefault();
+                        Managers.Inventory.unEquipedItem();
+                        Managers.Dialogue.DisableMainTextCommand();
+                        stopMoving();
+
+                    }
                 }
             }
         }//right click
         else if (Input.GetMouseButtonDown(1) && !AnimPlayerIsPlaying && !EventSystem.current.IsPointerOverGameObject())//όχι όταν πατάς πάνω σε ui element (πχ διαλόγους)
         {
+            if (Managers.Inventory.equippedInvNum != -1)
+                Managers.Inventory.unEquipedItem();
+            Managers.Dialogue.DisableMainTextCommand();
             stopMoving();
             DistanceAddedToRemainingDistanceToActFrom = 100;
             Ray ray = camera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {
-                ClickParticleInstatiated = Instantiate(PrefabClickParticles, hit.point, Quaternion.identity);
-                Destroy(ClickParticleInstatiated, 1);
+                showParticleAfterClick(hit.point);
                 GameObject hitObject = hit.transform.gameObject;
                 InteractableObject target = hitObject.GetComponent<InteractableObject>();
                 ObjectClicked = target;
@@ -176,6 +193,7 @@ public class PlayerController : MonoBehaviour
     }
     public void stopMoving()
     {
+        
         character.Move(Vector3.zero, false, false);
         agent.SetDestination(transform.position);
         
@@ -189,6 +207,14 @@ public class PlayerController : MonoBehaviour
     public void SetAnimPlayerIsPlaying(bool _AnimPlayerIsPlaying)
     {
         AnimPlayerIsPlaying = _AnimPlayerIsPlaying;
+    }
+    void showParticleAfterClick(Vector3 point)
+    {
+        Vector3 pointOfParticle;//εμφανίζεται ένα particlesystem όταν κάνεις κλικ κάπου. Μετακινείται λίγο προς την κάμερα για να φαίνεται ολόκληρο
+        pointOfParticle = point + (Camera.main.transform.forward * -0.3f);
+
+        ClickParticleInstatiated = Instantiate(PrefabClickParticles, pointOfParticle, Quaternion.identity);
+        Destroy(ClickParticleInstatiated, 1);
     }
 
 }

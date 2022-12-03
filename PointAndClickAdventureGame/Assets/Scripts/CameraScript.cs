@@ -48,7 +48,6 @@ public class CameraScript : MonoBehaviour
             yRotValue = yRotValue-360;
          float yRot = Mathf.Clamp(yRotValue, -20, 20);
         
-        Debug.Log(yRot);
         transform.eulerAngles = new Vector3(xRot, yRot, transform.eulerAngles.z);
     }
 }

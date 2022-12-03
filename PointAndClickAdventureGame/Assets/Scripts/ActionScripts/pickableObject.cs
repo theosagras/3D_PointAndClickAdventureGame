@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class pickableObject : MonoBehaviour
 {
-    public Sprite Icon;
-    public float timeToPickAfterAnim;//πόσα δευτερόλεπτα μέχρι να πάει στο inv, εξαρτάται από το anim
-   
+    [SerializeField] Sprite Icon;
+    [SerializeField] float timeToPickAfterAnim;//πόσα δευτερόλεπτα μέχρι να πάει στο inv, εξαρτάται από το anim
+    [SerializeField] Texture2D CursorIconItem;
     [SerializeField] float distanceFromObjToAct;
     // Start is called before the first frame update
     void Start()
@@ -52,7 +52,8 @@ public class pickableObject : MonoBehaviour
             }
 
         }
-        Managers.Inventory.AddItem(parentObj.name, parentObj.description, Icon);
+
+        Managers.Inventory.AddItem(parentObj.getName(), parentObj.getNameObjWithArticle(), parentObj.description, Icon, timeToPickAfterAnim, CursorIconItem);
         Managers.Inventory.DisplayItems();
         Managers.Scene.UpdateNavMesh();
         Managers.UI_Manager.setCursorTodefault();
@@ -60,6 +61,7 @@ public class pickableObject : MonoBehaviour
         Destroy(gameObject);
 
     }
+
 
 
 

@@ -5,7 +5,14 @@ using UnityEngine;
 public class usableObject : MonoBehaviour
 {
     [SerializeField] float distanceFromObjToAct;
-    // Start is called before the first frame update
+    [TextArea(3, 10)]
+    public string[] notActionDialogue;
+    public EnumWhichUseAction whichUseAction;
+    public enum EnumWhichUseAction
+    {
+        noActionDialogue,
+        use
+    }
     void Start()
     {
 
@@ -19,8 +26,18 @@ public class usableObject : MonoBehaviour
     public  void act()
     {
 
-        Debug.Log("use");
-    
+        switch (whichUseAction)
+        {
+            case EnumWhichUseAction.noActionDialogue:
+                Managers.Dialogue.StartDescription(notActionDialogue);
+                Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
+                break;
+            case EnumWhichUseAction.use:
+                Debug.Log("use");
+                break;
+        }
+        Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
+
     }
     public float _getDistanceToActFrom()
     {

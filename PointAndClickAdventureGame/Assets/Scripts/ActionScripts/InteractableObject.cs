@@ -18,9 +18,18 @@ public  class InteractableObject : MonoBehaviour
      Texture2D CursorUseTxtr;
      Texture2D CursorExitTxtr;
      Texture2D CursorPickUpTxtr;
-     Texture2D CursorSpeakTxtr;
+    Texture2D CursorTalkTxtr;
+    Texture2D CursorSpeakTxtr;
      Texture2D CursorPlayTxtr;
+    public string getName()
+    {
+        return nameObj;
+    }
 
+    public string getNameObjWithArticle()
+    {
+        return nameObjWithArticle;
+    }
 
     public void act()
     {
@@ -40,6 +49,10 @@ public  class InteractableObject : MonoBehaviour
                 lookableObject l_obj = GetComponent<lookableObject>();
                 l_obj.act();
                 break;
+            case EnumWhichActions.talk:
+                talkableChar t_obj = GetComponent<talkableChar>();
+                t_obj.act();
+                break;
 
         }
     }
@@ -49,7 +62,8 @@ public  class InteractableObject : MonoBehaviour
     {
         look,
         use,
-        pickUp        
+        pickUp,
+        talk
     }
     public float getDistanceToActFrom()
     {
@@ -63,8 +77,11 @@ public  class InteractableObject : MonoBehaviour
                 return u_obj._getDistanceToActFrom();
             case EnumWhichActions.look:
                 lookableObject l_obj = GetComponent<lookableObject>();
-                l_obj.act();
+              
                 return l_obj._getDistanceToActFrom();
+            case EnumWhichActions.talk:
+                talkableChar t_obj = GetComponent<talkableChar>();            
+                return t_obj._getDistanceToActFrom();
         }
         return 0;
     }
@@ -75,7 +92,7 @@ public  class InteractableObject : MonoBehaviour
         CursorLookTxtr = Resources.Load<Texture2D>("Cursor/look");
         CursorUseTxtr = Resources.Load<Texture2D>("Cursor/use");
         CursorPickUpTxtr = Resources.Load<Texture2D>("Cursor/pickUp");
-   
+        CursorTalkTxtr = Resources.Load<Texture2D>("Cursor/talk");
     }
 
     public Vector3 getWaypointIfExistsOtherwiseObjectsPos()
@@ -100,30 +117,59 @@ public  class InteractableObject : MonoBehaviour
     void OnMouseEnter()
     {
         string commandStr="";
-        if (whichAction == EnumWhichActions.look)
+        int equippedItem = Managers.Inventory.equippedInvNum;
+        if (equippedItem == -1)
         {
-            Cursor.SetCursor(CursorLookTxtr, hotSpot, cursorMode);
-            commandStr = "κοίταξε ";
-        }
-        else if (whichAction == EnumWhichActions.use)
-        {
-            Cursor.SetCursor(CursorUseTxtr, hotSpot, cursorMode);
-            commandStr = "χρησιμοποίησε ";
+            if (whichAction == EnumWhichActions.look)
+            {
+                Cursor.SetCursor(CursorLookTxtr, hotSpot, cursorMode);
+                commandStr = "κοίταξε ";
+            }
+            else if (whichAction == EnumWhichActions.use)
+            {
+                Cursor.SetCursor(CursorUseTxtr, hotSpot, cursorMode);
+                commandStr = "χρησιμοποίησε ";
+
+            }
+            else if (whichAction == EnumWhichActions.pickUp)
+            {
+                Cursor.SetCursor(CursorPickUpTxtr, pickUpCursorOffset, cursorMode);
+                commandStr = "πάρε ";
+            }
+            else if (whichAction == EnumWhichActions.talk)
+            {
+                Cursor.SetCursor(CursorTalkTxtr, pickUpCursorOffset, cursorMode);
+                commandStr = "μίλα ";
+            }
+            commandStr += nameObjWithArticle;
 
         }
-        else if (whichAction == EnumWhichActions.pickUp)
+        else
         {
-            Cursor.SetCursor(CursorPickUpTxtr, pickUpCursorOffset, cursorMode);
-            commandStr = "πάρε ";
+            commandStr = "χρησιμοποίησε ";
+
+            commandStr += Managers.Inventory.invButtons[equippedItem].GetComponent<ItemInvComponent>().nameObjWithArticle;
+            string mestr = " με ";
+            commandStr += mestr;
+            commandStr += nameObjWithArticle;
         }
-        commandStr += nameObjWithArticle;
         Managers.Dialogue.EnableMainTextCommand(commandStr);
         
     }
     private void OnMouseExit()
     {
-        Cursor.SetCursor(CursorDefaultTxt, hotSpot, cursorMode);
-        Managers.Dialogue.DisableMainTextCommand();
+
+        int equippedItem = Managers.Inventory.equippedInvNum;
+        if (equippedItem == -1)
+        {
+            Cursor.SetCursor(CursorDefaultTxt, hotSpot, cursorMode);
+            Managers.Dialogue.DisableMainTextCommand();
+        }
+        else
+        {
+            Managers.Inventory.invButtons[equippedItem].GetComponent<ItemClickInvenoryScript>().ItemClicked();
+        }
+        
     }
 
 }

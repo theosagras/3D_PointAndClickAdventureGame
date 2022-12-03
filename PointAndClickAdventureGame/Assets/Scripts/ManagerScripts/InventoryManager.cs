@@ -9,20 +9,25 @@ public class InventoryManager : MonoBehaviour, GameManager
     public ManagerStatus status { get; private set; }
     private Dictionary<string, string[]> _items;
     public Animator invAnimLeftRight;
-    public GameObject[] invButtons;
+    public Button[] invButtons;
     public int WhichInvShownFirst=0;
     public Button leftInvButton;
     public Button rightInvButton;
-
+    public Button equippedInvButton;
     private bool invIsUp;
     public Animator invAnim;
+    public SpriteRenderer spriteRendererCursorItem;
+    Sprite cursorItemSprite;
+    public int equippedInvNum { get; set; }// -1 no equpped item,  0-14 equipped
     public void Startup()
     {
+        equippedInvNum = -1;
         _items = new Dictionary<string, string[]>();
         Debug.Log("Inventory manager starting...");
         status = ManagerStatus.Started;
      
     }
+  
     public void InvBtnPressed()
     {
         if (!invIsUp)//να κατεβει το inv
@@ -63,7 +68,7 @@ public class InventoryManager : MonoBehaviour, GameManager
         }
         Debug.Log(itemDisplay);
     }
-    public void AddItem(string name,string[] desc,Sprite sprite)
+    public void AddItem(string name,string nameObjWithArticle, string[] desc,Sprite sprite,float timeToPickAfterAnim, Texture2D ItemIconCursor)
     {
         if (_items.ContainsKey(name))
         {
@@ -72,8 +77,10 @@ public class InventoryManager : MonoBehaviour, GameManager
         else
         {
             _items.Add(name, desc);
+            cursorItemSprite = sprite;
             invButtons[_items.Count-1].GetComponent<Image>().sprite = sprite;
-
+            invButtons[_items.Count - 1].GetComponent<ItemInvComponent>().SetProperties(sprite, name, nameObjWithArticle, desc, timeToPickAfterAnim, ItemIconCursor);
+            
         }
     }
     public List<string> GetItemList()
@@ -134,5 +141,18 @@ public class InventoryManager : MonoBehaviour, GameManager
     public void setRightInvButton(bool onOff)
     {
         rightInvButton.interactable = onOff;
+    }
+
+
+    public void SetEquipedItem(Sprite spriteEquip, int invID)
+    {
+        equippedInvButton.GetComponent<Image>().sprite = spriteEquip;
+        equippedInvNum = invID;
+    }
+    public void unEquipedItem()
+    {
+        equippedInvButton.GetComponent<Image>().sprite = null;
+        equippedInvNum = -1;
+        Managers.UI_Manager.setCursorTodefault();
     }
 }

@@ -30,6 +30,7 @@ public class DialogueManager : MonoBehaviour, GameManager
     }
     public void StartDialogue(Dialogue dialogue)
     {
+        dialogueGameObject.SetActive(true);
         sentences.Clear();
         nameText.text = dialogue.name;
         foreach (string sentence in dialogue.sentences)
@@ -58,7 +59,9 @@ public class DialogueManager : MonoBehaviour, GameManager
     }
     void EndDialogue()
     {
+        Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
         dialogueGameObject.SetActive(false);
+
     }
 
 
@@ -96,4 +99,8 @@ public class DialogueManager : MonoBehaviour, GameManager
         DownMainTextGameObject.SetActive(false);
     }
     
+    public void OpenCommandText()
+    {
+        string commandStr = "";
+    }
 }

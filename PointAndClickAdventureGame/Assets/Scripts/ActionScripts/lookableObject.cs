@@ -21,7 +21,7 @@ public class lookableObject : MonoBehaviour
         InteractableObject parentObj = GetComponent<InteractableObject>();
         Managers.Dialogue.StartDescription(parentObj.description);
 
-
+        Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
     }
     public float _getDistanceToActFrom()
     {
