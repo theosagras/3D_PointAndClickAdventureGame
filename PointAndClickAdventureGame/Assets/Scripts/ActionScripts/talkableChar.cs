@@ -20,7 +20,11 @@ public class talkableChar : MonoBehaviour
     {
         Debug.Log("talk");
         Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
-
+        GetComponent<DialogueTrigger>().TriggerDialogue();
+        if (GetComponent<WomanController>()!=null)
+        GetComponent<WomanController>().stopMoving();
+        if (GetComponent<otherManController>() != null)
+            GetComponent<otherManController>().stopMoving();
     }
     public float _getDistanceToActFrom()
     {

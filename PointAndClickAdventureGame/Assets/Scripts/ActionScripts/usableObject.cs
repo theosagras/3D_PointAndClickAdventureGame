@@ -7,6 +7,7 @@ public class usableObject : MonoBehaviour
     [SerializeField] float distanceFromObjToAct;
     [TextArea(3, 10)]
     public string[] notActionDialogue;
+    public float SecsBeforeAnim;
     public EnumWhichUseAction whichUseAction;
     public enum EnumWhichUseAction
     {
@@ -23,9 +24,8 @@ public class usableObject : MonoBehaviour
     {
 
     }
-    public  void act()
+    public void act()
     {
-
         switch (whichUseAction)
         {
             case EnumWhichUseAction.noActionDialogue:
@@ -33,10 +33,16 @@ public class usableObject : MonoBehaviour
                 Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
                 break;
             case EnumWhichUseAction.use:
-                Debug.Log("use");
+                Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
+
+                specialAct();
                 break;
         }
         Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
+    }
+
+    public virtual void specialAct()
+    {
 
     }
     public float _getDistanceToActFrom()

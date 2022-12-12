@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour
 {
     public Camera camera;
     public NavMeshAgent agent;
-    public float initialAgentsSpeed;
+    private float initialAgentsSpeed;
     public ThirdPersonCharacter character;
     private int leftClickedPressedTimes;
     private float firstLeftClickTime;
@@ -16,7 +16,6 @@ public class PlayerController : MonoBehaviour
 
     InteractableObject ObjectClicked;
     float DistanceAddedToRemainingDistanceToActFrom;
-    bool isTurning;
     bool facingTarget;
     bool rightClicked;
     Vector3 direcToTurn;
@@ -24,44 +23,129 @@ public class PlayerController : MonoBehaviour
     public GameObject PrefabClickParticles;//εμφανίζεται όταν κάνεις αριστερό κλικ
     private GameObject ClickParticleInstatiated;
     private bool AnimPlayerIsPlaying;
-    public Dialogue nothingThere;
+    private Vector3 directionToFace;
+    bool arrivedDest;
     void Start()
     {
-        agent.updateRotation = false;
+        agent.updateRotation = false ;
+        initialAgentsSpeed = Managers.Player.playerControl.agent.speed;
     }
 
-    // Update is called once per frame
+    private void RotateTowards(Vector3 targetV3)
+    {
+        Vector3 direction = (targetV3 - transform.position).normalized;
+        Quaternion lookRotation = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.Lerp(transform.rotation, lookRotation, Time.deltaTime * 4.5f);
+        if (Mathf.Abs(lookRotation.eulerAngles.y - transform.rotation.eulerAngles.y) < 2)
+        {
+            //transform.rotation = lookRotation;
+            if (!rightClicked)
+            {
+                if (ObjectClicked != null)
+                {
+                    ObjectClicked.act();
+                    facingTarget = false;
+                    ObjectClicked = null;
+                    stopMoving();
+                }
+
+            }
+            else//αν είχε πατηθεί δεξί κλικ κάνει examine
+            {
+                facingTarget = true;
+            }
+           
+           
+            
+        }
+        
+    }
     void Update()
     {
-
+        if (Input.GetKey(KeyCode.Space))
+        {
+            Managers.Inventory.DisplayItems();
+        }
 
         if (agent.remainingDistance > agent.stoppingDistance + DistanceAddedToRemainingDistanceToActFrom)//Κινείται προς προορισμό αν απέχει από αυτόν
         {
- 
+            
 
             character.Move(agent.desiredVelocity, false, false);
         }
         else
         {
-            //έφτασε στον προορισμό
-            if ((!isTurning) && (!facingTarget))//αν δεν κοιτάει προς στόχο
+            agent.SetDestination(transform.position);
+
+            if (rightClicked)
             {
+                if (!facingTarget)
+                    RotateTowards(directionToFace);
+                else
+                {
+                    if (ObjectClicked != null)
+                    {
+                        Managers.Dialogue.StartDescription(ObjectClicked.description);
+                        
+                    }
+                    else
+                    {
+
+                        string[] nothingThereStr = new string[1];
+                        nothingThereStr[0] = "Δεν υπάρχει τίποτα εκεί";
+
+                        Managers.Dialogue.StartDescription(nothingThereStr);
+                    }
+                    stopMoving();
+                }
+
+            }
+            //έφτασε στον προορισμό
+            else
+            {
+                
                 if (ObjectClicked == null)//αν δεν υπάρχει αντικείμενο στόχου
                     stopMoving();
                 else
-                    setDirectionToFace(ObjectClicked.transform.position);
+                {
+                    if (!facingTarget)
+                    {
+                        character.Move(Vector3.zero, false, false);
+                        //agent.SetDestination(transform.position);
+                        RotateTowards(ObjectClicked.transform.position);
+                    }
+
+                    else
+                    {
+                        // character.Move(Vector3.zero, false, false);
+                        facingTarget = false;
+                    }
+
+                }
             }
+        }
+         /*
 
             else if ((isTurning) && (!facingTarget))//Ο παίκτης περιστρέφεται προς στόχο 
             {
-                Quaternion rot = Quaternion.LookRotation(direcToTurn);
-                transform.rotation = Quaternion.Lerp(transform.rotation, rot, 4.5f * Time.deltaTime);
+                Vector3 direction = (directionToFace - transform.position).normalized;
+                Quaternion lookRotation = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5);
 
-                if (Mathf.Abs(Quaternion.Dot(transform.rotation, rot)) > 0.999f)// να ο παίκτης κοιτάει προς στόχο τότε θα κάνει 
+                Debug.Log(Quaternion.Dot(transform.rotation, lookRotation));
+                Debug.Log("gonia");
+                Debug.Log(lookRotation.eulerAngles.y);
+                Debug.Log(transform.rotation.eulerAngles.y);
+                if (Mathf.Abs(lookRotation.eulerAngles.y - transform.rotation.eulerAngles.y)<1)
+               // if (Mathf.Abs(Quaternion.Dot(transform.rotation, lookRotation))>0.99f)// να ο παίκτης κοιτάει προς στόχο τότε θα κάνει 
                 {
+                    transform.rotation = lookRotation;
                     isTurning = false;
                     facingTarget = true;
                 }
+                //transform.rotation = rot;
+               // Debug.Log(Quaternion.Dot(transform.rotation, rot));
+                
             }
             else if ((!isTurning) && (facingTarget))//Ο παίκτης κοιτάει τον στόχο
             {
@@ -101,11 +185,13 @@ public class PlayerController : MonoBehaviour
                 stopMoving();
             }
         }
+    */
         //left mouse click
         if (Input.GetMouseButtonDown(0) && !AnimPlayerIsPlaying && !EventSystem.current.IsPointerOverGameObject())//όχι όταν πατάς πάνω σε ui element (πχ διαλόγους)
         {
             Managers.Player.playerControl.agent.speed = initialAgentsSpeed;
             leftClickedPressedTimes++;
+          
             if (leftClickedPressedTimes==1)
             {
                 firstLeftClickTime = Time.time;
@@ -119,6 +205,8 @@ public class PlayerController : MonoBehaviour
             if (Physics.Raycast(ray, out hit))
             {
                 showParticleAfterClick(hit.point);
+                Managers.UI_Manager.clickShowCircle();
+                
                 GameObject hitObject = hit.transform.gameObject;
                 InteractableObject target = hitObject.GetComponent<InteractableObject>();
                 if (target != null)
@@ -137,7 +225,7 @@ public class PlayerController : MonoBehaviour
                     }
                     else//αν έχει equipped item
                     {
-                        Managers.Dialogue.StartDialogue(nothingThere);
+                        Managers.Dialogue.StartDialogue(5);
                         Managers.UI_Manager.setCursorTodefault();
                         Managers.Inventory.unEquipedItem();
                         Managers.Dialogue.DisableMainTextCommand();
@@ -152,13 +240,14 @@ public class PlayerController : MonoBehaviour
             if (Managers.Inventory.equippedInvNum != -1)
                 Managers.Inventory.unEquipedItem();
             Managers.Dialogue.DisableMainTextCommand();
-            stopMoving();
+            
             DistanceAddedToRemainingDistanceToActFrom = 100;
             Ray ray = camera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {
                 showParticleAfterClick(hit.point);
+                Managers.UI_Manager.clickShowCircle();
                 GameObject hitObject = hit.transform.gameObject;
                 InteractableObject target = hitObject.GetComponent<InteractableObject>();
                 ObjectClicked = target;
@@ -185,23 +274,29 @@ public class PlayerController : MonoBehaviour
         leftClickedPressedTimes = 0;
        
     }
-    public void setDirectionToFace(Vector3 directionToface)
+    public void setDirectionToFace(Vector3 _directionToface)
     {
-        isTurning = true;
-        direcToTurn = directionToface - transform.position;
-        direcToTurn.y = 0;
+        
+        directionToFace = _directionToface;
+        Vector3 direction = (directionToFace - transform.position).normalized;
+        Quaternion lookRotation = Quaternion.LookRotation(direction);
+        if (Mathf.Abs(lookRotation.eulerAngles.y - transform.rotation.eulerAngles.y) > 2)
+            facingTarget = false;
+        else
+            facingTarget = true;
+
+
     }
     public void stopMoving()
     {
         
         character.Move(Vector3.zero, false, false);
         agent.SetDestination(transform.position);
-        
 
+        arrivedDest = false;
         ObjectClicked = null;
         rightClicked = false;
         facingTarget = false;
-        isTurning = false;
     }
 
     public void SetAnimPlayerIsPlaying(bool _AnimPlayerIsPlaying)
@@ -211,7 +306,7 @@ public class PlayerController : MonoBehaviour
     void showParticleAfterClick(Vector3 point)
     {
         Vector3 pointOfParticle;//εμφανίζεται ένα particlesystem όταν κάνεις κλικ κάπου. Μετακινείται λίγο προς την κάμερα για να φαίνεται ολόκληρο
-        pointOfParticle = point + (Camera.main.transform.forward * -0.3f);
+        pointOfParticle = point + (Camera.main.transform.forward * -0.1f);
 
         ClickParticleInstatiated = Instantiate(PrefabClickParticles, pointOfParticle, Quaternion.identity);
         Destroy(ClickParticleInstatiated, 1);

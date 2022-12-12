@@ -7,7 +7,7 @@ public class InventoryManager : MonoBehaviour, GameManager
 {
 
     public ManagerStatus status { get; private set; }
-    private Dictionary<string, string[]> _items;
+    private Dictionary<string, int> _items;//το value είναι η θέση στο inventory
     public Animator invAnimLeftRight;
     public Button[] invButtons;
     public int WhichInvShownFirst=0;
@@ -22,7 +22,7 @@ public class InventoryManager : MonoBehaviour, GameManager
     public void Startup()
     {
         equippedInvNum = -1;
-        _items = new Dictionary<string, string[]>();
+        _items = new Dictionary<string, int>();
         Debug.Log("Inventory manager starting...");
         status = ManagerStatus.Started;
      
@@ -57,14 +57,10 @@ public class InventoryManager : MonoBehaviour, GameManager
     public void DisplayItems()
     {
         string itemDisplay = "Items: ";
-        foreach (KeyValuePair<string, string[]> item in _items)
+        foreach (KeyValuePair<string, int> item in _items)
         {
-            itemDisplay += item.Key + " (";
-            foreach (string aa in item.Value)
-            {
-                itemDisplay += aa;
-                itemDisplay += ") ";
-            }
+            itemDisplay += item.Key + " ("+ item.Value + ") " ;
+           
         }
         Debug.Log(itemDisplay);
     }
@@ -72,11 +68,10 @@ public class InventoryManager : MonoBehaviour, GameManager
     {
         if (_items.ContainsKey(name))
         {
-
         }
         else
         {
-            _items.Add(name, desc);
+            _items.Add(name, _items.Count);
             cursorItemSprite = sprite;
             invButtons[_items.Count-1].GetComponent<Image>().sprite = sprite;
             invButtons[_items.Count - 1].GetComponent<ItemInvComponent>().SetProperties(sprite, name, nameObjWithArticle, desc, timeToPickAfterAnim, ItemIconCursor);
@@ -154,5 +149,43 @@ public class InventoryManager : MonoBehaviour, GameManager
         equippedInvButton.GetComponent<Image>().sprite = null;
         equippedInvNum = -1;
         Managers.UI_Manager.setCursorTodefault();
+    }
+    public string getEquppedItemName()
+    {
+        string _nameObj = invButtons[equippedInvNum].GetComponent<ItemInvComponent>().nameObj;
+        return _nameObj;
+    }
+
+    public void removeItem(string itemNameToRemove)
+    {
+        int invNumToRemove = _items[itemNameToRemove];
+        Debug.Log("invNumToRemove"+ invNumToRemove);
+        
+        unEquipedItem();
+        _items.Remove(itemNameToRemove);
+        
+       // copyInvItemFromTo(_equippedInvNum + 1, _equippedInvNum);
+       
+        int itemsSize = _items.Count;
+        Debug.Log("itemsSize "+ itemsSize);
+
+        for (int i= invNumToRemove; i< itemsSize; i++)
+        {
+            int a = i + 1;
+            Debug.Log("fromInt " + a);
+            Debug.Log("toInt " + i);
+            copyInvItemFromTo(i + 1, i);
+        }
+        invButtons[itemsSize].GetComponent<ItemInvComponent>().remove();
+
+
+    }
+
+    public void copyInvItemFromTo(int fromInt,int toInt)
+    {
+        ItemInvComponent temp = invButtons[fromInt].GetComponent<ItemInvComponent>();
+        invButtons[toInt].GetComponent<ItemInvComponent>().SetProperties(temp.Icon, temp.nameObj, temp.nameObjWithArticle, temp.description, temp.timeToPickAfterAnim, temp.ItemIconCursorTexture);
+        invButtons[toInt].GetComponent<Image>().sprite = temp.Icon;
+        _items[temp.nameObj]= toInt;
     }
 }

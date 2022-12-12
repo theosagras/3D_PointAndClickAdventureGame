@@ -7,8 +7,15 @@ public class DialogueManager : MonoBehaviour, GameManager
 {
     public ManagerStatus status { get; private set; }
     public TextMeshProUGUI nameText;
-    public TextMeshProUGUI dialogueText;
-    public GameObject dialogueGameObject;
+    public TextMeshProUGUI playerDialogueText;
+    public GameObject PlayerDialogueGameObject;
+
+    public GameObject DownChoicesDialogue;
+    public TextMeshProUGUI Choice0Btn;
+    public TextMeshProUGUI Choice1Btn;
+    public TextMeshProUGUI Choice2Btn;
+    public TextMeshProUGUI Choice3Btn;
+
 
     private Queue<string> sentences;
     public GameObject uiNextBtn;
@@ -17,7 +24,11 @@ public class DialogueManager : MonoBehaviour, GameManager
 
     public GameObject DownMainTextGameObject;
     public TextMeshProUGUI DownMainText;
-
+    public PlaceDialogueUpHeadScipt PDUH;
+    public GameObject sceneDialogues;
+    public GameObject sceneChoices;
+    public Dialogue dialogue;
+    public Choices choices;
     void Start()
     {
         sentences = new Queue<string>();
@@ -28,9 +39,37 @@ public class DialogueManager : MonoBehaviour, GameManager
 
         status = ManagerStatus.Started;
     }
-    public void StartDialogue(Dialogue dialogue)
+    public void StartDialogue(int DialogueNumber)
     {
-        dialogueGameObject.SetActive(true);
+         dialogue = sceneDialogues.GetComponent<DialogueOfScene>().getDialogue(DialogueNumber);
+
+
+
+        PDUH.setWhoIsSpeaking(dialogue.name);
+        PlayerDialogueGameObject.SetActive(true);
+
+        sentences.Clear();
+        foreach (string sentence in dialogue.sentences)
+        {
+            sentences.Enqueue(sentence);
+        }
+
+        DisplayNextSentence();
+    }
+    public void StartChoices(int choicesNumber)
+    {
+        choices = sceneChoices.GetComponent<ChoicesOfScence>().getChoices(choicesNumber);
+        PlayerDialogueGameObject.SetActive(false);
+        DownChoicesDialogue.SetActive(true);
+        Choice0Btn.text = choices.ChoiceSentences[0];
+        Choice1Btn.text = choices.ChoiceSentences[1];
+        Choice2Btn.text = choices.ChoiceSentences[2];
+        Choice3Btn.text = choices.ChoiceSentences[3];
+        Choice0Btn.GetComponentInParent<ChoiceBtnPressed>().setChoicesNextDialogueNum(choices.nextDialogue[0]);
+        Choice1Btn.GetComponentInParent<ChoiceBtnPressed>().setChoicesNextDialogueNum(choices.nextDialogue[1]);
+        Choice2Btn.GetComponentInParent<ChoiceBtnPressed>().setChoicesNextDialogueNum(choices.nextDialogue[2]);
+        Choice3Btn.GetComponentInParent<ChoiceBtnPressed>().setChoicesNextDialogueNum(choices.nextDialogue[3]);
+        /*
         sentences.Clear();
         nameText.text = dialogue.name;
         foreach (string sentence in dialogue.sentences)
@@ -39,37 +78,56 @@ public class DialogueManager : MonoBehaviour, GameManager
         }
 
         DisplayNextSentence();
+        */
     }
+
 
     public void DisplayNextSentence()
     {
         uiNextBtn.SetActive(true);
         if (sentences.Count == 1)
-            uiNextBtn.SetActive(false);
+        {
+            if (dialogue.nextChoice==0)
+            if (dialogue.nextnum == 0)
+                uiNextBtn.SetActive(false);
+        }
         else if (sentences.Count == 0)
         {
-
-            EndDialogue();
-
+            if (dialogue.nextChoice == 0)
+            {
+                if (dialogue.nextnum == 0)
+                    EndDialogue();
+                else
+                {
+                    StartDialogue(dialogue.nextnum);
+                }
+            }
+            else
+            {
+                StartChoices(dialogue.nextChoice);
+            }
             return;
         }
         timeOpenedDialogueSentence = 2;//2 δευτερόλεπτα θα παραμεινει ανοιχτή η φράση
         string sentence = sentences.Dequeue();
-        dialogueText.text = sentence;
+        playerDialogueText.text = sentence;
+        
+
     }
     void EndDialogue()
     {
+        uiNextBtn.SetActive(false);
         Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
-        dialogueGameObject.SetActive(false);
+        PlayerDialogueGameObject.SetActive(false);
 
     }
 
 
     public void StartDescription(string[] description)
     {
-        dialogueGameObject.SetActive(true);
+        PDUH.setWhoIsSpeaking("player");
+        PlayerDialogueGameObject.SetActive(true);
         sentences.Clear();
-        nameText.text = "Εγώ";
         foreach (string sentence in description)
         {
             sentences.Enqueue(sentence);
@@ -98,7 +156,7 @@ public class DialogueManager : MonoBehaviour, GameManager
         DownMainText.text = "";
         DownMainTextGameObject.SetActive(false);
     }
-    
+
     public void OpenCommandText()
     {
         string commandStr = "";

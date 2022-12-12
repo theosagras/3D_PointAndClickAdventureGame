@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ItemInvComponent : MonoBehaviour
 {
@@ -36,6 +37,16 @@ public class ItemInvComponent : MonoBehaviour
         description = _description;
         timeToPickAfterAnim = _timeToPickAfterAnim;//πόσα δευτερόλεπτα μέχρι να πάει στο inv, εξαρτάται από το anim
         ItemIconCursorTexture=_ItemIconCursorTexture;
+    }
+    public void remove()
+    {
+        Icon = null;
+        nameObj = null;
+        nameObjWithArticle = null;
+        description = null;
+        timeToPickAfterAnim = 0;//πόσα δευτερόλεπτα μέχρι να πάει στο inv, εξαρτάται από το anim
+        ItemIconCursorTexture = null;
+        GetComponent<Image>().sprite = null;
     }
 
 }

@@ -23,7 +23,7 @@ public class pickableObject : MonoBehaviour
     {
         Debug.Log("PickedUp");
         Managers.Inventory.InvGoDownForced();
-        Managers.Player.setAnimToPlay();
+        Managers.Player.setAnimToPlay("PickUp");
         StartCoroutine(pickUpAfterAnim());
        
     
@@ -55,7 +55,7 @@ public class pickableObject : MonoBehaviour
 
         Managers.Inventory.AddItem(parentObj.getName(), parentObj.getNameObjWithArticle(), parentObj.description, Icon, timeToPickAfterAnim, CursorIconItem);
         Managers.Inventory.DisplayItems();
-        Managers.Scene.UpdateNavMesh();
+       Managers.Scene.UpdateNavMesh();
         Managers.UI_Manager.setCursorTodefault();
         Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
         Destroy(gameObject);

@@ -30,8 +30,8 @@ public class PlayerManager : MonoBehaviour, GameManager
         Debug.Log("Health: " + health + "/" + maxHealth);
     }
 
-    public void setAnimToPlay()
+    public void setAnimToPlay(string triggerName)
     {
-        animatorPlayer.SetTrigger("PickUp");
+        animatorPlayer.SetTrigger(triggerName);
     }
 }

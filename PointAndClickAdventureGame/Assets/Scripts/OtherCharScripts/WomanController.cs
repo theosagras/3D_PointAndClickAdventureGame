@@ -29,11 +29,33 @@ public class WomanController : MonoBehaviour
         }
         else
         {
-            currentDestNum++;
-            if (currentDestNum == Destinations.Length)
-                currentDestNum = 0;
-            agent.SetDestination(Destinations[currentDestNum]);
+            if (currentDestNum == -1)
+            {
+                character.Move(Vector3.zero, false, false);
+                agent.SetDestination(transform.position);
+            }
+            else
+            {
+                currentDestNum++;
+                if (currentDestNum == Destinations.Length)
+                    currentDestNum = 0;
+
+                else
+                {
+                    agent.SetDestination(Destinations[currentDestNum]);
+
+                }
+            }
+
         }
+
+    }
+    public void stopMoving()
+    {
+
+        character.Move(Vector3.zero, false, false);
+        agent.SetDestination(transform.position);
+        currentDestNum = -1;
 
     }
 }
