@@ -19,9 +19,9 @@ public class lookableObject : MonoBehaviour
     public  void act()
     {
         InteractableObject parentObj = GetComponent<InteractableObject>();
-        Managers.Dialogue.StartDescription(parentObj.description);
+        Managers.Dialogue.StartDescription(parentObj.itemClass.description);
 
-        Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
+       // Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
     }
     public float _getDistanceToActFrom()
     {

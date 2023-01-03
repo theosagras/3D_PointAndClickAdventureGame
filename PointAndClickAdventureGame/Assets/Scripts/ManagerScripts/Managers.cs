@@ -7,15 +7,16 @@ public class Managers : MonoBehaviour
 {
     public static PlayerManager Player { get; private set; }
     public static InventoryManager Inventory { get; private set; }
-    public static SceneManager Scene { get; private set; }
+    public static Scene_Manager Scene { get; private set; }
     public static UIManager UI_Manager { get; private set; }
     public static DialogueManager Dialogue { get; private set; }
     private List<GameManager> _startSequence;
     void Awake()
     {
+        DontDestroyOnLoad(gameObject);
         Player = GetComponent<PlayerManager>();
         Inventory = GetComponent<InventoryManager>();
-        Scene = GetComponent<SceneManager>();
+        Scene = GetComponent<Scene_Manager>();
         UI_Manager = GetComponent<UIManager>();
         Dialogue = GetComponent<DialogueManager>();
         _startSequence = new List<GameManager>();

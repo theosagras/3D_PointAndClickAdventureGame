@@ -4,10 +4,9 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 public class InteractableObject : MonoBehaviour
 {
-    [SerializeField] string nameObj;
-    [SerializeField] string nameObjWithArticle;
-    [TextArea(3, 10)]
-    public string[] description;
+    [SerializeField]
+    public ItemClass itemClass;
+  
     public EnumWhichActions whichAction;
     CursorMode cursorMode = CursorMode.Auto;
     Vector2 hotSpot = Vector2.zero;
@@ -25,18 +24,18 @@ public class InteractableObject : MonoBehaviour
     public bool CombinableObj;
     public string getName()
     {
-        return nameObj;
+        return itemClass.nameObj;
     }
 
     public string getNameObjWithArticle()
     {
-        return nameObjWithArticle;
+        return itemClass.nameObjWithArticle;
     }
 
     public void act()
     {
         Managers.Player.playerControl.SetAnimPlayerIsPlaying(true);
-        if (Managers.Inventory.equippedInvNum == -1)//αν δεν έχει equipped αντικείμενο
+        if (Managers.Inventory.getEquppedItemName() == null)//αν δεν έχει equipped αντικείμενο
         {
             switch (whichAction)
             {
@@ -120,6 +119,8 @@ public class InteractableObject : MonoBehaviour
         CursorPickUpTxtr = Resources.Load<Texture2D>("Cursor/pickUp");
         CursorTalkTxtr = Resources.Load<Texture2D>("Cursor/talk");
         CursorExitTxtr = Resources.Load<Texture2D>("Cursor/exit");
+
+
     }
 
     public Vector3 getWaypointIfExistsOtherwiseObjectsPos()
@@ -146,8 +147,8 @@ public class InteractableObject : MonoBehaviour
         if (!EventSystem.current.IsPointerOverGameObject())
         {
             string commandStr = "";
-            int equippedItem = Managers.Inventory.equippedInvNum;
-            if (equippedItem == -1)
+            string equippedItem = Managers.Inventory.getEquppedItemName();
+            if (equippedItem == null)
             {
                 if (whichAction == EnumWhichActions.look)
                 {
@@ -170,6 +171,7 @@ public class InteractableObject : MonoBehaviour
                 }
                 else if (whichAction == EnumWhichActions.talk)
                 {
+                    Debug.Log("taklable");
                     Cursor.SetCursor(CursorTalkTxtr, pickUpCursorOffset, cursorMode);
                     commandStr = "μίλα ";
                 }
@@ -178,17 +180,17 @@ public class InteractableObject : MonoBehaviour
                     Cursor.SetCursor(CursorExitTxtr, pickUpCursorOffset, cursorMode);
                     commandStr = "Βγες από ";
                 }
-                commandStr += nameObjWithArticle;
+                commandStr += itemClass.nameObjWithArticle;
 
             }
             else
             {
                 commandStr = "χρησιμοποίησε ";
 
-                commandStr += Managers.Inventory.invButtons[equippedItem].GetComponent<ItemInvComponent>().nameObjWithArticle;
+                commandStr += Managers.Inventory.getEquppedItemName();
                 string mestr = " με ";
                 commandStr += mestr;
-                commandStr += nameObjWithArticle;
+                commandStr += itemClass.nameObjWithArticle;
             }
             Managers.Dialogue.EnableMainTextCommand(commandStr);
         }
@@ -197,15 +199,15 @@ public class InteractableObject : MonoBehaviour
     private void OnMouseExit()
     {
 
-        int equippedItem = Managers.Inventory.equippedInvNum;
-        if (equippedItem == -1)
+        if (Managers.Inventory.getEquppedItemName() == null)
         {
             Cursor.SetCursor(CursorDefaultTxt, hotSpot, cursorMode);
             Managers.Dialogue.DisableMainTextCommand();
         }
         else
         {
-            Managers.Inventory.invButtons[equippedItem].GetComponent<ItemClickInvenoryScript>().ItemClicked();
+            int numOfInvBtnEquipped = Managers.Inventory.getNumOfInvBtnClicked();
+            Managers.Inventory.invButtons[numOfInvBtnEquipped].GetComponent<ItemClickInvenoryScript>().ItemClicked();
         }
 
     }

@@ -26,7 +26,7 @@ public class ItemRightClickInventoryScript : MonoBehaviour, IPointerClickHandler
         {
             if (GetComponent<ItemInvComponent>().name != null)
             {
-                string[] descrip = GetComponent<ItemInvComponent>().description;
+                string[] descrip = GetComponent<ItemInvComponent>().itemClass.description;
                 Managers.Dialogue.StartDescription(descrip);
 
             }

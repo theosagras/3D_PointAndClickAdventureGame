@@ -9,6 +9,8 @@ public class usableObject : MonoBehaviour
     public string[] notActionDialogue;
     public float SecsBeforeAnim;
     public EnumWhichUseAction whichUseAction;
+    public string notActionPlayerAnim;
+    public float secsBeforDialogue;
     public enum EnumWhichUseAction
     {
         noActionDialogue,
@@ -29,8 +31,10 @@ public class usableObject : MonoBehaviour
         switch (whichUseAction)
         {
             case EnumWhichUseAction.noActionDialogue:
-                Managers.Dialogue.StartDescription(notActionDialogue);
-                Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
+                StartCoroutine(waiAndStartDialog());
+                
+                Managers.Player.setAnimToPlay(notActionPlayerAnim);
+
                 break;
             case EnumWhichUseAction.use:
                 Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
@@ -40,8 +44,13 @@ public class usableObject : MonoBehaviour
         }
         Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
     }
+    IEnumerator waiAndStartDialog()
+    {
+        yield return new WaitForSeconds(secsBeforDialogue);
+        Managers.Dialogue.StartDescription(notActionDialogue);
 
-    public virtual void specialAct()
+    }
+        public virtual void specialAct()
     {
 
     }

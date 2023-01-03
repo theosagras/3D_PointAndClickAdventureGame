@@ -19,6 +19,7 @@ public class OpenDoorWhite : usableObject
     }
     public override void specialAct()
     {
+        Debug.Log("openiningDoor");
         Managers.Player.setAnimToPlay("PickUp");
 
         StartCoroutine(OpenDoorNum1());

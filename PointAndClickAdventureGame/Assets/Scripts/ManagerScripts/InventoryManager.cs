@@ -7,27 +7,28 @@ public class InventoryManager : MonoBehaviour, GameManager
 {
 
     public ManagerStatus status { get; private set; }
-    private Dictionary<string, int> _items;//το value είναι η θέση στο inventory
+    private Dictionary<string, ItemClass> _items;//το value είναι η θέση στο inventory
     public Animator invAnimLeftRight;
     public Button[] invButtons;
-    public int WhichInvShownFirst=0;
+    public int WhichInvShownFirst = 0;
     public Button leftInvButton;
     public Button rightInvButton;
     public Button equippedInvButton;
     private bool invIsUp;
     public Animator invAnim;
     public SpriteRenderer spriteRendererCursorItem;
-    Sprite cursorItemSprite;
-    public int equippedInvNum { get; set; }// -1 no equpped item,  0-14 equipped
+    private string equippedItem { get; set; }
+    private int numOfInvBtnClicked;
+    List <string> ItemsRemovedFromScenes=new List<string>();
     public void Startup()
     {
-        equippedInvNum = -1;
-        _items = new Dictionary<string, int>();
+        _items = new Dictionary<string, ItemClass>();
         Debug.Log("Inventory manager starting...");
         status = ManagerStatus.Started;
-     
+
+
     }
-  
+
     public void InvBtnPressed()
     {
         if (!invIsUp)//να κατεβει το inv
@@ -45,7 +46,7 @@ public class InventoryManager : MonoBehaviour, GameManager
         invAnim.SetBool("goUp1", true);
         invAnim.SetBool("goDown1", false);
         invIsUp = true;
-       
+
     }
     public void InvGoDownForced()
     {
@@ -57,42 +58,42 @@ public class InventoryManager : MonoBehaviour, GameManager
     public void DisplayItems()
     {
         string itemDisplay = "Items: ";
-        foreach (KeyValuePair<string, int> item in _items)
+        foreach (KeyValuePair<string, ItemClass> item in _items)
         {
-            itemDisplay += item.Key + " ("+ item.Value + ") " ;
-           
+            itemDisplay += item.Key + " (" + item.Value.nameObj + ") ";
+
         }
         Debug.Log(itemDisplay);
     }
-    public void AddItem(string name,string nameObjWithArticle, string[] desc,Sprite sprite,float timeToPickAfterAnim, Texture2D ItemIconCursor)
+    public void AddItem(ItemClass itemToAddClass)//,string nameObjWithArticle, string[] desc,Sprite sprite,float timeToPickAfterAnim, Texture2D ItemIconCursor
     {
-        if (_items.ContainsKey(name))
+        if (_items.ContainsKey(itemToAddClass.nameObj))
         {
         }
         else
         {
-            _items.Add(name, _items.Count);
-            cursorItemSprite = sprite;
-            invButtons[_items.Count-1].GetComponent<Image>().sprite = sprite;
-            invButtons[_items.Count - 1].GetComponent<ItemInvComponent>().SetProperties(sprite, name, nameObjWithArticle, desc, timeToPickAfterAnim, ItemIconCursor);
-            
+            _items.Add(itemToAddClass.nameObj, itemToAddClass);
+
+            invButtons[_items.Count - 1].GetComponent<ItemInvComponent>().itemClass = itemToAddClass;
+            invButtons[_items.Count - 1].GetComponent<Image>().sprite = Resources.Load<Sprite>("ItemIcons/" + itemToAddClass.nameObj);
+            AddItemToItemsRemovedFromScenes(itemToAddClass.nameObj);
         }
     }
-    public List<string> GetItemList()
+    public List<string> GetItemNameList()
     {
         List<string> list = new List<string>(_items.Keys);
         return list;
     }
-    /*
-    public int GetItemCount(string name)
+    public List<ItemClass> GetItemClassList()
     {
-        if (_items.ContainsKey(name))
+        List<ItemClass> itemClassList = new List<ItemClass>();
+        foreach (ItemClass iC in _items.Values)
         {
-            return _items[name];
+            itemClassList.Add(iC);
         }
-        return 0;
+        return itemClassList;
     }
-    */
+
 
     public void InvMoveRight()
     {
@@ -139,53 +140,103 @@ public class InventoryManager : MonoBehaviour, GameManager
     }
 
 
-    public void SetEquipedItem(Sprite spriteEquip, int invID)
+    public void SetEquipedItem(string itemEquipped, int _numOfInvBtnClicked)
     {
-        equippedInvButton.GetComponent<Image>().sprite = spriteEquip;
-        equippedInvNum = invID;
+        equippedInvButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("ItemIcons/" + itemEquipped);
+        equippedItem = itemEquipped;
+        numOfInvBtnClicked = _numOfInvBtnClicked;
     }
+    public void SetNumOfInvBtnClicked(int _numOfInvBtnClicked)
+    {
+        numOfInvBtnClicked = _numOfInvBtnClicked;
+    }
+
     public void unEquipedItem()
     {
         equippedInvButton.GetComponent<Image>().sprite = null;
-        equippedInvNum = -1;
+        equippedItem = null;
+        numOfInvBtnClicked = -1;
         Managers.UI_Manager.setCursorTodefault();
     }
     public string getEquppedItemName()
     {
-        string _nameObj = invButtons[equippedInvNum].GetComponent<ItemInvComponent>().nameObj;
-        return _nameObj;
+
+        return equippedItem;
+    }
+    public int getNumOfInvBtnClicked()
+    {
+
+        return numOfInvBtnClicked;
     }
 
     public void removeItem(string itemNameToRemove)
     {
-        int invNumToRemove = _items[itemNameToRemove];
-        Debug.Log("invNumToRemove"+ invNumToRemove);
-        
+
         unEquipedItem();
         _items.Remove(itemNameToRemove);
-        
-       // copyInvItemFromTo(_equippedInvNum + 1, _equippedInvNum);
-       
-        int itemsSize = _items.Count;
-        Debug.Log("itemsSize "+ itemsSize);
-
-        for (int i= invNumToRemove; i< itemsSize; i++)
-        {
-            int a = i + 1;
-            Debug.Log("fromInt " + a);
-            Debug.Log("toInt " + i);
-            copyInvItemFromTo(i + 1, i);
-        }
-        invButtons[itemsSize].GetComponent<ItemInvComponent>().remove();
+        updateInventory();
 
 
     }
-
-    public void copyInvItemFromTo(int fromInt,int toInt)
+    private void updateInventory()
     {
-        ItemInvComponent temp = invButtons[fromInt].GetComponent<ItemInvComponent>();
-        invButtons[toInt].GetComponent<ItemInvComponent>().SetProperties(temp.Icon, temp.nameObj, temp.nameObjWithArticle, temp.description, temp.timeToPickAfterAnim, temp.ItemIconCursorTexture);
-        invButtons[toInt].GetComponent<Image>().sprite = temp.Icon;
-        _items[temp.nameObj]= toInt;
+        int i = 0;
+        foreach (KeyValuePair<string, ItemClass> keyValue in _items)
+        {
+
+            invButtons[i].GetComponent<ItemInvComponent>().itemClass = keyValue.Value;
+            invButtons[i].GetComponent<Image>().sprite = Resources.Load<Sprite>("ItemIcons/" + keyValue.Key);
+            i++;
+        }
+        for (int j = i; j < 15; j++)
+        {
+            invButtons[j].GetComponent<ItemInvComponent>().itemClass = null;
+            invButtons[j].GetComponent<Image>().sprite = null;
+        }
+
     }
+
+    public void RemoveAllItems()
+    {
+        _items.Clear();
+        ItemsRemovedFromScenes.Clear();
+    }
+    public void InsertItemsFromSaveFile(SaveDataClass sDC)
+    {
+        for (int i=sDC.items.Length;i>0;i--)
+        {
+            ItemClass iC = new ItemClass();
+            iC.nameObj = sDC.items[i-1];
+            iC.nameObjWithArticle = sDC.nameObjWithArticle[i-1];
+            iC.description = sDC.description[i-1];
+            _items.Add(iC.nameObj, iC);
+            updateInventory();
+        }
+    }
+
+    //Η παρακάτω λίστα χρησιμευεί όταν γίνεται load ενός αποθηκευμένου παιχνιδιού να αφαιρούνται αντικείμενα που δεν πρέπει να υπάρχουν στην σκηνή.
+    public void AddItemToItemsRemovedFromScenes(string itemName)
+    {
+        ItemsRemovedFromScenes.Add(itemName);
+    }
+    public List<string> getItemsRemovedFromScenes()
+    {
+        return ItemsRemovedFromScenes;
+    }
+
+    public void setListItemsRemovedFromScenes(List<string> listItemToRemove)
+    {
+
+        ItemsRemovedFromScenes = listItemToRemove;
+    }
+    public bool checkIfItemIsInRemoveList(string nameItem)
+    {
+        if (ItemsRemovedFromScenes.Contains(nameItem))
+        {
+            return true;
+        }
+        else return false;
+    }
+
+
 }

@@ -19,17 +19,21 @@ public class ItemClickInvenoryScript : MonoBehaviour
 
     public void ItemClicked()
     {
-        int i = GetComponent<ItemInvComponent>().getIdInvNum();
-        Texture2D IconItemCursor= GetComponent<ItemInvComponent>().ItemIconCursorTexture;
-        Sprite _spriteSet=GetComponent<Image>().sprite;
-        Managers.Inventory.SetEquipedItem(_spriteSet, i);
-        Managers.UI_Manager.setCursorToItemIconAndUse(IconItemCursor);
-        string commandStr = "";
-        commandStr = "χρησιμοποίησε ";
+        if (GetComponent<ItemInvComponent>().itemClass.nameObj.Length>1)
+        {
+            string itemName = GetComponent<ItemInvComponent>().itemClass.nameObj;
+            int Id = GetComponent<ItemInvComponent>().getIdInvNum();
+            Texture2D IconItemCursor = Resources.Load<Texture2D>("CursorItems/" + itemName + "Cursor");
+            Sprite _spriteSet = Resources.Load<Sprite>("ItemIcons/" + itemName);
+            Managers.Inventory.SetEquipedItem(itemName, Id);
+            Managers.UI_Manager.setCursorToItemIconAndUse(IconItemCursor);
+            string commandStr = "";
+            commandStr = "χρησιμοποίησε ";
 
-        commandStr += Managers.Inventory.invButtons[Managers.Inventory.equippedInvNum].GetComponent<ItemInvComponent>().nameObjWithArticle;
-        string mestr = " με ";
-        commandStr += mestr;
-        Managers.Dialogue.EnableMainTextCommand(commandStr);
+            commandStr += GetComponent<ItemInvComponent>().itemClass.nameObjWithArticle;
+            string mestr = " με ";
+            commandStr += mestr;
+            Managers.Dialogue.EnableMainTextCommand(commandStr);
+        }
     }
 }

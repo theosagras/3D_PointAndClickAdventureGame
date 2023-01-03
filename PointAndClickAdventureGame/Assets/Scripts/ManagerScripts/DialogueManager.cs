@@ -29,6 +29,7 @@ public class DialogueManager : MonoBehaviour, GameManager
     public GameObject sceneChoices;
     public Dialogue dialogue;
     public Choices choices;
+    public GameObject UpHeadDialogue;
     void Start()
     {
         sentences = new Queue<string>();
@@ -87,9 +88,14 @@ public class DialogueManager : MonoBehaviour, GameManager
         uiNextBtn.SetActive(true);
         if (sentences.Count == 1)
         {
-            if (dialogue.nextChoice==0)
-            if (dialogue.nextnum == 0)
-                uiNextBtn.SetActive(false);
+            if (dialogue.nextChoice == 0)
+                if (dialogue.nextnum == 0)
+                {
+                    uiNextBtn.SetActive(false);
+                    Managers.Player.playerControl.ResetTargetRigValueHead();
+                    Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);//όταν φτάσει στην τελευταία φράση μπορεί να κινηθεί αλλού
+
+                }
         }
         else if (sentences.Count == 0)
         {
@@ -117,8 +123,9 @@ public class DialogueManager : MonoBehaviour, GameManager
     void EndDialogue()
     {
         uiNextBtn.SetActive(false);
-        Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
+      
         PlayerDialogueGameObject.SetActive(false);
+        //Managers.Player.playerControl.SetAnimPlayerIsPlaying(false);
 
     }
 
